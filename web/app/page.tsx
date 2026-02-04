@@ -20,17 +20,18 @@ async function getNews() {
     const res = await fetch(RSS_URL, { cache: 'no-store' });
     if (!res.ok) return [];
     const xml = await res.text();
-    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
-      .slice(0, 6)
-      .map((match) => {
-        const block = match[1];
-        return {
-          title: decodeCdata(extractTag(block, 'title')),
-          link: decodeCdata(extractTag(block, 'link')),
-          pubDate: decodeCdata(extractTag(block, 'pubDate'))
-        };
-      })
-      .filter((item) => item.title && item.link);
+    const items = [];
+    const regex = /<item>([\s\S]*?)<\/item>/gi;
+    let match = regex.exec(xml);
+    while (match && items.length < 6) {
+      const block = match[1];
+      items.push({
+        title: decodeCdata(extractTag(block, 'title')),
+        link: decodeCdata(extractTag(block, 'link')),
+        pubDate: decodeCdata(extractTag(block, 'pubDate'))
+      });
+      match = regex.exec(xml);
+    }
 
     return items;
   } catch {
