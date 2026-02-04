@@ -1,0 +1,9 @@
+{
+  "name": "runepulse",
+  "private": true,
+  "workspaces": ["api"],
+  "scripts": {
+    "start": "npm --prefix api run start",
+    "dev": "npm --prefix api run dev"
+  }
+}
