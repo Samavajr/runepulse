@@ -1,0 +1,14 @@
+﻿{
+  "name": "runepulse-api",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.5.0",
+    "fastify": "^4.26.2",
+    "pg-promise": "^11.6.0"
+  }
+}

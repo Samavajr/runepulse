@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.osrstelemetry'
+version = '0.1.0'
+
+repositories {
+    mavenLocal()
+    maven { url 'https://repo.runelite.net' }
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    compileOnly 'net.runelite:client:latest.release'
+}
