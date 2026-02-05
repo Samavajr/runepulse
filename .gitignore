@@ -12,3 +12,5 @@ coverage/
 *.log
 runelite-plugin/build/
 runelite-plugin/.gradle/
+runepulse-plugin/
+plugin-hub/
