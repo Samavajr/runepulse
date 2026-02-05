@@ -16,3 +16,7 @@ export async function getGear(username: string) {
 export async function getBossKc(username: string) {
   return api(`/profile/${username}/boss-kc?limit=10`);
 }
+
+export async function getSkillsSummary(username: string) {
+  return api(`/profile/${username}/skills-summary`);
+}

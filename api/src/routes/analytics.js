@@ -1,6 +1,25 @@
 import { db } from '../db.js';
 import { accountFromToken } from '../auth.js';
 
+function xpForLevel(level) {
+  let points = 0;
+  for (let lvl = 1; lvl < level; lvl++) {
+    points += Math.floor(lvl + 300 * Math.pow(2, lvl / 7));
+  }
+  return Math.floor(points / 4);
+}
+
+function levelForXp(xp) {
+  let level = 1;
+  for (let lvl = 2; lvl <= 99; lvl++) {
+    if (xp < xpForLevel(lvl)) {
+      break;
+    }
+    level = lvl;
+  }
+  return level;
+}
+
 export default async function analyticsRoutes(app) {
   app.get('/profile/:username/xp-totals', async (req) => {
     const { username } = req.params;
@@ -138,6 +157,55 @@ export default async function analyticsRoutes(app) {
        LIMIT $2`,
       [account.id, limit]
     );
+  });
+
+  app.get('/profile/:username/skills-summary', async (req) => {
+    const { username } = req.params;
+    const account = await db.oneOrNone(
+      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
+      [username]
+    );
+    if (!account) {
+      return [];
+    }
+    if (account.is_public === false) {
+      return [];
+    }
+
+    const rows = await db.any(
+      `
+      SELECT skill,
+             COALESCE(MAX(b.xp), 0) AS baseline_xp,
+             COALESCE(SUM(e.xp_gained), 0) AS gained_xp
+      FROM (
+        SELECT skill FROM xp_baselines WHERE account_id = $1
+        UNION
+        SELECT skill FROM xp_events WHERE account_id = $1
+      ) s
+      LEFT JOIN xp_baselines b
+        ON b.account_id = $1 AND b.skill = s.skill
+      LEFT JOIN xp_events e
+        ON e.account_id = $1 AND e.skill = s.skill
+      GROUP BY skill
+      ORDER BY skill ASC
+      `,
+      [account.id]
+    );
+
+    return rows.map((row) => {
+      const currentXp = Number(row.baseline_xp || 0) + Number(row.gained_xp || 0);
+      const level = levelForXp(currentXp);
+      const nextLevelXp = level >= 99 ? currentXp : xpForLevel(level + 1);
+      const toNext = Math.max(nextLevelXp - currentXp, 0);
+
+      return {
+        skill: row.skill,
+        xp: currentXp,
+        level,
+        nextLevelXp,
+        xpToNext: toNext
+      };
+    });
   });
 
   app.post('/profile/visibility', async (req, reply) => {

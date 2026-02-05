@@ -2,7 +2,8 @@ import XpTotalsTable from '@/components/XpTotalsTable';
 import XpHistoryChart from '@/components/XpHistoryChart';
 import GearPanel from '@/components/GearPanel';
 import BossKcList from '@/components/BossKcList';
-import { api, getBossKc, getGear } from '@/lib/api';
+import SkillsSummaryTable from '@/components/SkillsSummaryTable';
+import { api, getBossKc, getGear, getSkillsSummary } from '@/lib/api';
 
 export default async function Page({ params }) {
   const totals = await api(`/profile/${params.username}/xp-totals`);
@@ -20,6 +21,7 @@ export default async function Page({ params }) {
   }
   const gear = await getGear(params.username);
   const bossKc = await getBossKc(params.username);
+  const skillsSummary = await getSkillsSummary(params.username);
   const sumXp = (rows) => (rows || []).reduce((sum, row) => sum + Number(row.xp || 0), 0);
   const xpToday = sumXp(totals.day);
   const xpWeek = sumXp(totals.week);
@@ -48,6 +50,11 @@ export default async function Page({ params }) {
           <div className="xp-number">{xpMonth.toLocaleString()}</div>
         </div>
       </div>
+
+      <section className="section">
+        <h2>Skills overview</h2>
+        <SkillsSummaryTable rows={skillsSummary || []} />
+      </section>
 
       <div className="grid grid-2">
         <section className="section">
