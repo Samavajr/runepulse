@@ -2,6 +2,9 @@
 
 export async function api(path) {
   const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
+  if (res.status === 403) {
+    return { private: true };
+  }
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }

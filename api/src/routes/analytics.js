@@ -1,15 +1,19 @@
-﻿import { db } from '../db.js';
+import { db } from '../db.js';
+import { accountFromToken } from '../auth.js';
 
 export default async function analyticsRoutes(app) {
   app.get('/profile/:username/xp-totals', async (req) => {
     const { username } = req.params;
 
     const account = await db.oneOrNone(
-      'SELECT id FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
+      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
       [username]
     );
     if (!account) {
       return { notFound: true, username };
+    }
+    if (account.is_public === false) {
+      return { private: true, username };
     }
 
     const windows = {
@@ -60,10 +64,13 @@ export default async function analyticsRoutes(app) {
     };
 
     const account = await db.oneOrNone(
-      'SELECT id FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
+      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
       [username]
     );
     if (!account) {
+      return [];
+    }
+    if (account.is_public === false) {
       return [];
     }
 
@@ -89,10 +96,13 @@ export default async function analyticsRoutes(app) {
   app.get('/profile/:username/gear', async (req) => {
     const { username } = req.params;
     const account = await db.oneOrNone(
-      'SELECT id FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
+      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
       [username]
     );
     if (!account) {
+      return { slots: {}, timestamp: null };
+    }
+    if (account.is_public === false) {
       return { slots: {}, timestamp: null };
     }
 
@@ -110,10 +120,13 @@ export default async function analyticsRoutes(app) {
     const { username } = req.params;
     const limit = Math.min(Number(req.query.limit || 10), 50);
     const account = await db.oneOrNone(
-      'SELECT id FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
+      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
       [username]
     );
     if (!account) {
+      return [];
+    }
+    if (account.is_public === false) {
       return [];
     }
 
@@ -125,5 +138,21 @@ export default async function analyticsRoutes(app) {
        LIMIT $2`,
       [account.id, limit]
     );
+  });
+
+  app.post('/profile/visibility', async (req, reply) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    const account = await accountFromToken(token);
+    if (!account) return reply.code(403).send();
+
+    const { isPublic } = req.body || {};
+    if (typeof isPublic !== 'boolean') return reply.code(400).send();
+
+    await db.none(
+      'UPDATE accounts SET is_public = $1, updated_at = NOW() WHERE id = $2',
+      [isPublic, account.id]
+    );
+
+    return { ok: true, isPublic };
   });
 }

@@ -35,6 +35,7 @@ export default function RootLayout({
                   Search
                 </button>
               </form>
+              <a className="button" href="/compare">Compare</a>
             </div>
           </nav>
           {children}

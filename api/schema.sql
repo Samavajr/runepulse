@@ -2,6 +2,7 @@ CREATE TABLE accounts (
   id UUID PRIMARY KEY,
   username TEXT NOT NULL,
   api_token_hash TEXT UNIQUE NOT NULL,
+  is_public BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
