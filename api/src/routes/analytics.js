@@ -174,7 +174,7 @@ export default async function analyticsRoutes(app) {
 
     const rows = await db.any(
       `
-      SELECT skill,
+      SELECT s.skill AS skill,
              COALESCE(MAX(b.xp), 0) AS baseline_xp,
              COALESCE(SUM(e.xp_gained), 0) AS gained_xp
       FROM (
@@ -186,8 +186,8 @@ export default async function analyticsRoutes(app) {
         ON b.account_id = $1 AND b.skill = s.skill
       LEFT JOIN xp_events e
         ON e.account_id = $1 AND e.skill = s.skill
-      GROUP BY skill
-      ORDER BY skill ASC
+      GROUP BY s.skill
+      ORDER BY s.skill ASC
       `,
       [account.id]
     );
