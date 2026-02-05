@@ -76,6 +76,11 @@ public class TelemetryPlugin extends Plugin
             configManager.setConfiguration("runepulse", "pairNow", false);
         }
 
+        if ("publicProfile".equals(event.getKey()))
+        {
+            service.updateVisibility(configManager.getConfig(TelemetryConfig.class).publicProfile());
+        }
+
         if ("paired".equals(event.getKey()))
         {
             service.syncPaired(configManager);

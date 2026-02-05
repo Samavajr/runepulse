@@ -156,6 +156,11 @@ public class TelemetryService
         configManager.setConfiguration("runepulse", "paired", paired);
     }
 
+    public void updateVisibility(boolean isPublic)
+    {
+        executor.submit(() -> uploader.sendVisibility(isPublic));
+    }
+
     private void sendBaseline(Client client)
     {
         String username = client.getLocalPlayer().getName();

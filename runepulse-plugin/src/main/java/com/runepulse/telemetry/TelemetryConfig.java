@@ -56,5 +56,15 @@ public interface TelemetryConfig extends Config
     {
         return false;
     }
+
+    @ConfigItem(
+        keyName = "publicProfile",
+        name = "Public Profile",
+        description = "Allow your profile to be publicly viewable"
+    )
+    default boolean publicProfile()
+    {
+        return true;
+    }
 }
 

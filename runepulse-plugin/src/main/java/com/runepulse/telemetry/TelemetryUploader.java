@@ -54,6 +54,13 @@ public class TelemetryUploader
         postJson(buildUrl("/ingest/boss-kc"), gson.toJson(snapshot));
     }
 
+    public void sendVisibility(boolean isPublic)
+    {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("isPublic", isPublic);
+        postJson(buildUrl("/profile/visibility"), gson.toJson(obj));
+    }
+
     public String pair()
     {
         String url = buildUrl("/pair");

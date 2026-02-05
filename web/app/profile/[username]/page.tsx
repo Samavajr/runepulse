@@ -1,9 +1,7 @@
 import XpTotalsTable from '@/components/XpTotalsTable';
 import XpHistoryChart from '@/components/XpHistoryChart';
-import XpGoalCard from '@/components/XpGoalCard';
 import GearPanel from '@/components/GearPanel';
 import BossKcList from '@/components/BossKcList';
-import PrivacyToggle from '@/components/PrivacyToggle';
 import { api, getBossKc, getGear } from '@/lib/api';
 
 export default async function Page({ params }) {
@@ -20,7 +18,6 @@ export default async function Page({ params }) {
       </main>
     );
   }
-  const goals = await api(`/profile/${params.username}/goals`);
   const gear = await getGear(params.username);
   const bossKc = await getBossKc(params.username);
   const sumXp = (rows) => (rows || []).reduce((sum, row) => sum + Number(row.xp || 0), 0);
@@ -69,19 +66,6 @@ export default async function Page({ params }) {
         <BossKcList rows={bossKc} />
       </div>
 
-      <section className="section">
-        <h2>Goals</h2>
-        <div className="grid grid-2">
-          {goals.map((g) => (
-            <XpGoalCard key={g.id} goal={g} />
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <h2>Privacy</h2>
-        <PrivacyToggle />
-      </section>
     </main>
   );
 }
