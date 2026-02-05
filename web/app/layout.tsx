@@ -4,6 +4,9 @@ import LogoMark from '@/components/LogoMark';
 export const metadata = {
   title: 'RunePulse',
   description: 'RuneLite-powered XP analytics',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
