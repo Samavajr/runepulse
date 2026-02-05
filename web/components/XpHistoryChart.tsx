@@ -17,7 +17,6 @@ export default function XpHistoryChart({ username, skill }) {
   const [range, setRange] = useState('month');
   const [metric, setMetric] = useState('xp');
   const [chartType, setChartType] = useState('auto');
-  const [selectedSkill, setSelectedSkill] = useState(skill || 'Attack');
   const [data, setData] = useState([]);
   const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000';
   const formatLocal = (value) => {
@@ -39,38 +38,11 @@ export default function XpHistoryChart({ username, skill }) {
     lifetime: 24 * 7
   };
 
-  const skillOptions = [
-    'Attack',
-    'Strength',
-    'Defence',
-    'Ranged',
-    'Prayer',
-    'Magic',
-    'Runecraft',
-    'Hitpoints',
-    'Crafting',
-    'Mining',
-    'Smithing',
-    'Fishing',
-    'Cooking',
-    'Firemaking',
-    'Woodcutting',
-    'Agility',
-    'Herblore',
-    'Thieving',
-    'Fletching',
-    'Slayer',
-    'Farming',
-    'Construction',
-    'Hunter',
-    'Sailing'
-  ];
-
   useEffect(() => {
-    fetch(`${apiBase}/profile/${username}/xp-history/${selectedSkill}?range=${range}`)
+    fetch(`${apiBase}/profile/${username}/xp-history/${skill}?range=${range}`)
       .then((r) => r.json())
       .then(setData);
-  }, [apiBase, username, selectedSkill, range]);
+  }, [apiBase, username, skill, range]);
 
   const totalXp = data.reduce((sum, row) => sum + Number(row.xp || 0), 0);
   const bucket = bucketHours[range] || 1;
@@ -86,15 +58,6 @@ export default function XpHistoryChart({ username, skill }) {
     <div className="chart-shell">
       <div className="chart-header">
         <div className="chart-controls">
-          <select
-            className="select"
-            value={selectedSkill}
-            onChange={(e) => setSelectedSkill(e.target.value)}
-          >
-            {skillOptions.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
           <div className="toggle">
             <button
               className={`toggle-btn ${metric === 'xp' ? 'active' : ''}`}

@@ -1,8 +1,7 @@
-import XpTotalsTable from '@/components/XpTotalsTable';
-import XpHistoryChart from '@/components/XpHistoryChart';
 import GearPanel from '@/components/GearPanel';
 import BossKcList from '@/components/BossKcList';
-import SkillsSummaryTable from '@/components/SkillsSummaryTable';
+import SkillsOverviewPanel from '@/components/SkillsOverviewPanel';
+import StatsSummary from '@/components/StatsSummary';
 import { api, getBossKc, getGear, getSkillsSummary } from '@/lib/api';
 
 export default async function Page({ params }) {
@@ -22,51 +21,18 @@ export default async function Page({ params }) {
   const gear = await getGear(params.username);
   const bossKc = await getBossKc(params.username);
   const skillsSummary = await getSkillsSummary(params.username);
-  const sumXp = (rows) => (rows || []).reduce((sum, row) => sum + Number(row.xp || 0), 0);
-  const xpToday = sumXp(totals.day);
-  const xpWeek = sumXp(totals.week);
-  const xpMonth = sumXp(totals.month);
 
   return (
     <main className="container grid" style={{ gap: 22 }}>
       <section className="section section--soft">
         <div className="stat-row">
           <h2 style={{ margin: 0 }}>{params.username}</h2>
-          <span className="mono">RunePulse profile</span>
         </div>
       </section>
 
-      <div className="grid grid-3">
-        <div className="card">
-          <div className="mono">Today</div>
-          <div className="xp-number">{xpToday.toLocaleString()}</div>
-        </div>
-        <div className="card">
-          <div className="mono">This week</div>
-          <div className="xp-number">{xpWeek.toLocaleString()}</div>
-        </div>
-        <div className="card">
-          <div className="mono">This month</div>
-          <div className="xp-number">{xpMonth.toLocaleString()}</div>
-        </div>
-      </div>
+      <StatsSummary totals={totals} />
 
-      <section className="section">
-        <h2>Skills overview</h2>
-        <SkillsSummaryTable rows={skillsSummary || []} />
-      </section>
-
-      <div className="grid grid-2">
-        <section className="section">
-          <h2>XP totals</h2>
-          <XpTotalsTable data={totals} />
-        </section>
-
-        <section className="section">
-          <h2>XP history</h2>
-          <XpHistoryChart username={params.username} skill="Attack" />
-        </section>
-      </div>
+      <SkillsOverviewPanel rows={skillsSummary || []} username={params.username} />
 
       <div className="grid grid-2">
         <GearPanel gear={gear} />

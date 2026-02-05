@@ -1,3 +1,5 @@
+'use client';
+
 const skillIcons = {
   Attack: 'Attack_icon.png',
   Strength: 'Strength_icon.png',
@@ -30,38 +32,63 @@ function getSkillIcon(skill) {
   return file ? `https://oldschool.runescape.wiki/images/${file}` : null;
 }
 
-export default function SkillsSummaryTable({ rows }) {
+function xpForLevel(level) {
+  let points = 0;
+  for (let i = 1; i < level; i += 1) {
+    points += Math.floor(i + 300 * Math.pow(2, i / 7));
+  }
+  return Math.floor(points / 4);
+}
+
+function getProgress(row) {
+  const level = Math.max(1, Number(row.level || 1));
+  const xp = Math.max(0, Number(row.xp || 0));
+  const levelBase = xpForLevel(level);
+  const nextBase = xpForLevel(level + 1);
+  const clampedXp = Math.max(xp, levelBase);
+  const span = Math.max(nextBase - levelBase, 1);
+  const progress = Math.min(Math.max((clampedXp - levelBase) / span, 0), 1);
+  const xpToNext = Number.isFinite(row.xpToNext)
+    ? Number(row.xpToNext)
+    : Math.max(nextBase - xp, 0);
+
+  return { level, xp, xpToNext, progress };
+}
+
+export default function SkillsSummaryTable({ rows, selectedSkill, onSelect }) {
   return (
-    <table className="table">
-      <thead>
-        <tr>
-          <th style={{ textAlign: 'left' }}>Skill</th>
-          <th style={{ textAlign: 'right' }}>Level</th>
-          <th style={{ textAlign: 'right' }}>XP</th>
-          <th style={{ textAlign: 'right' }}>To next</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => {
-          const icon = getSkillIcon(row.skill);
-          return (
-            <tr key={row.skill}>
-              <td>
-                <div className="skill-cell">
-                  <span className="skill-dot" data-has-icon={Boolean(icon)} />
-                  {icon ? <img className="skill-icon" src={icon} alt={row.skill} /> : null}
-                  <span>{row.skill}</span>
-                </div>
-              </td>
-              <td style={{ textAlign: 'right' }}>{row.level}</td>
-              <td style={{ textAlign: 'right' }}>
-                <span className="xp-number">{Number(row.xp || 0).toLocaleString()}</span>
-              </td>
-              <td style={{ textAlign: 'right' }}>{Number(row.xpToNext || 0).toLocaleString()}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="skills-scroll">
+      {rows.map((row) => {
+        const icon = getSkillIcon(row.skill);
+        const { level, xp, xpToNext, progress } = getProgress(row);
+        const isActive = selectedSkill === row.skill;
+        return (
+          <button
+            className={`skill-row ${isActive ? 'skill-row--active' : ''}`}
+            type="button"
+            key={row.skill}
+            onClick={() => onSelect?.(row.skill)}
+          >
+            <div className="skill-row-main">
+              <div className="skill-cell">
+                <span className="skill-dot" data-has-icon={Boolean(icon)} />
+                {icon ? <img className="skill-icon" src={icon} alt={row.skill} /> : null}
+                <span>{row.skill}</span>
+              </div>
+              <span className="skill-level">Lv {level}</span>
+            </div>
+            <div className="skill-row-bar">
+              <div className="skill-bar">
+                <div className="skill-bar-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
+              </div>
+              <div className="skill-row-meta">
+                <span className="xp-number">{xp.toLocaleString()} XP</span>
+                <span className="mono">{xpToNext.toLocaleString()} to next</span>
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
   );
 }
