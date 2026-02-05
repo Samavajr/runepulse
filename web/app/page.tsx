@@ -46,13 +46,6 @@ export default async function Home() {
     <main className="container grid">
       <section className="hero hero-split">
         <div className="grid" style={{ gap: 16 }}>
-          <div className="brand">
-            <span className="brand-mark"><LogoMark size={28} /></span>
-            <div>
-              <div className="brand-title">RunePulse</div>
-              <div className="brand-tag">Live XP & KC analytics</div>
-            </div>
-          </div>
           <p className="subtitle">
             Track XP gains with RuneLite accuracy. Search a username to see
             per-skill totals, historical charts, gear snapshots, and boss KC
@@ -75,7 +68,7 @@ export default async function Home() {
           <div className="hero-badges">
             <div className="hero-badge">
               <span>Live XP capture</span>
-              <span className="mono">2 min refresh</span>
+              <span className="mono">5 min refresh</span>
             </div>
             <div className="hero-badge">
               <span>Gear snapshots</span>
@@ -103,7 +96,7 @@ export default async function Home() {
             <div className="mono">Step 2</div>
             <strong>Play normally</strong>
             <p className="subtitle">
-              XP deltas, gear snapshots, and boss KC update on a 2 minute cycle.
+              XP deltas, gear snapshots, and boss KC update on a 5 minute cycle.
             </p>
           </div>
           <div className="card">
