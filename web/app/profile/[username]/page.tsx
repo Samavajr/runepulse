@@ -22,11 +22,13 @@ export default async function Page({ params }) {
   const bossKc = await getBossKc(params.username);
   const skillsSummary = await getSkillsSummary(params.username);
 
+  const displayName = totals?.username || params.username;
+
   return (
     <main className="container grid" style={{ gap: 22 }}>
       <section className="section section--soft">
         <div className="stat-row">
-          <h2 style={{ margin: 0 }}>{params.username}</h2>
+          <h2 style={{ margin: 0 }}>{displayName}</h2>
         </div>
       </section>
 

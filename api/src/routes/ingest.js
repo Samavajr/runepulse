@@ -7,7 +7,7 @@ async function mergeDuplicateAccounts(username, keepAccountId) {
 
   await db.tx(async (t) => {
     const dupRows = await t.any(
-      'SELECT id FROM accounts WHERE username = $1 AND id <> $2',
+      'SELECT id FROM accounts WHERE LOWER(username) = LOWER($1) AND id <> $2',
       [username, keepAccountId]
     );
     const dupIds = dupRows.map((r) => r.id);

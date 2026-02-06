@@ -7,6 +7,9 @@ CREATE TABLE accounts (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE INDEX IF NOT EXISTS accounts_username_lower_idx
+ON accounts (LOWER(username));
+
 CREATE TABLE xp_events (
   id BIGSERIAL PRIMARY KEY,
   account_id UUID REFERENCES accounts(id),

@@ -21,18 +21,26 @@ function levelForXp(xp) {
 }
 
 export default async function analyticsRoutes(app) {
+  async function accountByUsername(username) {
+    return db.oneOrNone(
+      `SELECT id, is_public, username
+       FROM accounts
+       WHERE LOWER(username) = LOWER($1)
+       ORDER BY updated_at DESC NULLS LAST
+       LIMIT 1`,
+      [username]
+    );
+  }
+
   app.get('/profile/:username/xp-totals', async (req) => {
     const { username } = req.params;
 
-    const account = await db.oneOrNone(
-      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
-      [username]
-    );
+    const account = await accountByUsername(username);
     if (!account) {
       return { notFound: true, username };
     }
     if (account.is_public === false) {
-      return { private: true, username };
+      return { private: true, username: account.username };
     }
 
     const windows = {
@@ -59,6 +67,7 @@ export default async function analyticsRoutes(app) {
       `, [account.id]);
     }
 
+    out.username = account.username;
     return out;
   });
 
@@ -82,10 +91,7 @@ export default async function analyticsRoutes(app) {
       lifetime: null
     };
 
-    const account = await db.oneOrNone(
-      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
-      [username]
-    );
+    const account = await accountByUsername(username);
     if (!account) {
       return [];
     }
@@ -114,10 +120,7 @@ export default async function analyticsRoutes(app) {
 
   app.get('/profile/:username/gear', async (req) => {
     const { username } = req.params;
-    const account = await db.oneOrNone(
-      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
-      [username]
-    );
+    const account = await accountByUsername(username);
     if (!account) {
       return { slots: {}, timestamp: null };
     }
@@ -138,10 +141,7 @@ export default async function analyticsRoutes(app) {
   app.get('/profile/:username/boss-kc', async (req) => {
     const { username } = req.params;
     const limit = Math.min(Number(req.query.limit || 10), 50);
-    const account = await db.oneOrNone(
-      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
-      [username]
-    );
+    const account = await accountByUsername(username);
     if (!account) {
       return [];
     }
@@ -161,10 +161,7 @@ export default async function analyticsRoutes(app) {
 
   app.get('/profile/:username/skills-summary', async (req) => {
     const { username } = req.params;
-    const account = await db.oneOrNone(
-      'SELECT id, is_public FROM accounts WHERE username = $1 ORDER BY updated_at DESC NULLS LAST LIMIT 1',
-      [username]
-    );
+    const account = await accountByUsername(username);
     if (!account) {
       return [];
     }
