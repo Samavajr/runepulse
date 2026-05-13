@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.5.0",
+    "dotenv": "^17.4.2",
     "fastify": "^4.26.2",
     "pg-promise": "^11.6.0"
   }

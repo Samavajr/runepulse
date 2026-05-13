@@ -38,7 +38,10 @@ export default function RootLayout({
                   Search
                 </button>
               </form>
-              <a className="button" href="/compare">Compare</a>
+              <div className="nav-actions">
+                <a className="button" href="/calculators">Calculators</a>
+                <a className="button" href="/compare">Compare</a>
+              </div>
             </div>
           </nav>
           {children}

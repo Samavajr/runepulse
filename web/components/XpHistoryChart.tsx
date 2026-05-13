@@ -12,13 +12,13 @@ import {
   BarChart,
   Bar
 } from 'recharts';
+import { API_BASE } from '@/lib/api';
 
 export default function XpHistoryChart({ username, skill }) {
   const [range, setRange] = useState('month');
   const [metric, setMetric] = useState('xp');
   const [chartType, setChartType] = useState('auto');
   const [data, setData] = useState([]);
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000';
   const formatLocal = (value) => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
@@ -39,10 +39,11 @@ export default function XpHistoryChart({ username, skill }) {
   };
 
   useEffect(() => {
-    fetch(`${apiBase}/profile/${username}/xp-history/${skill}?range=${range}`)
+    fetch(`${API_BASE}/profile/${username}/xp-history/${skill}?range=${range}`)
       .then((r) => r.json())
-      .then(setData);
-  }, [apiBase, username, skill, range]);
+      .then(setData)
+      .catch(() => setData([]));
+  }, [username, skill, range]);
 
   const totalXp = data.reduce((sum, row) => sum + Number(row.xp || 0), 0);
   const bucket = bucketHours[range] || 1;

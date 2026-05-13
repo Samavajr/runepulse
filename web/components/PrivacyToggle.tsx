@@ -1,17 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { API_BASE } from '@/lib/api';
 
 export default function PrivacyToggle() {
   const [token, setToken] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [status, setStatus] = useState('');
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000';
 
   const save = async () => {
     setStatus('Saving...');
     try {
-      const res = await fetch(`${apiBase}/profile/visibility`, {
+      const res = await fetch(`${API_BASE}/profile/visibility`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

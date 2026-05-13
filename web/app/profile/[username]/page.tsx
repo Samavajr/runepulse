@@ -29,6 +29,9 @@ export default async function Page({ params }) {
       <section className="section section--soft">
         <div className="stat-row">
           <h2 style={{ margin: 0 }}>{displayName}</h2>
+          <a className="button" href={`/calculators?username=${encodeURIComponent(params.username)}`}>
+            Calculator
+          </a>
         </div>
       </section>
 

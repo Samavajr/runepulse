@@ -1,5 +1,11 @@
 import { db } from '../db.js';
 import { accountFromToken } from '../auth.js';
+import { fetchHiscoreSkills } from '../hiscore.js';
+
+const WIKI_PRICE_BASE = 'https://prices.runescape.wiki/api/v1/osrs';
+const WIKI_HEADERS = {
+  'User-Agent': 'RunePulse calculator - github.com/Samavajr/runepulse'
+};
 
 function xpForLevel(level) {
   let points = 0;
@@ -20,7 +26,62 @@ function levelForXp(xp) {
   return level;
 }
 
+async function skillsSummaryFromHiscore(username) {
+  const skills = await fetchHiscoreSkills(username);
+  if (!skills) {
+    return [];
+  }
+
+  return skills.map((skill) => {
+    const currentXp = Number(skill.xp || 0);
+    const level = Number(skill.level || levelForXp(currentXp));
+    const nextLevelXp = level >= 99 ? currentXp : xpForLevel(level + 1);
+
+    return {
+      skill: skill.name,
+      xp: currentXp,
+      level,
+      nextLevelXp,
+      xpToNext: Math.max(nextLevelXp - currentXp, 0)
+    };
+  });
+}
+
 export default async function analyticsRoutes(app) {
+  app.get('/prices/latest', async (_req, reply) => {
+    const res = await fetch(`${WIKI_PRICE_BASE}/latest`, {
+      headers: WIKI_HEADERS
+    });
+
+    if (!res.ok) {
+      return reply.code(502).send({ data: {} });
+    }
+
+    return res.json();
+  });
+
+  app.get('/prices/mapping', async (_req, reply) => {
+    const res = await fetch(`${WIKI_PRICE_BASE}/mapping`, {
+      headers: WIKI_HEADERS
+    });
+
+    if (!res.ok) {
+      return reply.code(502).send([]);
+    }
+
+    return res.json();
+  });
+
+  app.get('/hiscore/:username/skills', async (req, reply) => {
+    const { username } = req.params;
+    const skills = await fetchHiscoreSkills(username);
+    if (!skills) {
+      return reply.code(404).send({ notFound: true, username });
+    }
+
+    return { username, skills };
+  });
+
   async function accountByUsername(username) {
     return db.oneOrNone(
       `SELECT id, is_public, username
@@ -163,7 +224,7 @@ export default async function analyticsRoutes(app) {
     const { username } = req.params;
     const account = await accountByUsername(username);
     if (!account) {
-      return [];
+      return skillsSummaryFromHiscore(username);
     }
     if (account.is_public === false) {
       return [];
@@ -188,6 +249,10 @@ export default async function analyticsRoutes(app) {
       `,
       [account.id]
     );
+
+    if (rows.length === 0) {
+      return skillsSummaryFromHiscore(username);
+    }
 
     return rows.map((row) => {
       const currentXp = Number(row.baseline_xp || 0) + Number(row.gained_xp || 0);

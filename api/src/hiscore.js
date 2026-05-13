@@ -1,6 +1,33 @@
 const HISCORE_URL =
   'https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player=';
 
+const SKILL_NAMES = [
+  'Overall',
+  'Attack',
+  'Defence',
+  'Strength',
+  'Hitpoints',
+  'Ranged',
+  'Prayer',
+  'Magic',
+  'Cooking',
+  'Woodcutting',
+  'Fletching',
+  'Fishing',
+  'Firemaking',
+  'Crafting',
+  'Smithing',
+  'Mining',
+  'Herblore',
+  'Agility',
+  'Thieving',
+  'Slayer',
+  'Farming',
+  'Runecraft',
+  'Hunter',
+  'Construction'
+];
+
 const BOSS_NAMES = [
   'Abyssal Sire',
   'Alchemical Hydra',
@@ -73,6 +100,26 @@ const BOSS_NAMES = [
 ];
 
 const BOSS_SET = new Set(BOSS_NAMES);
+
+export async function fetchHiscoreSkills(username) {
+  const url = `${HISCORE_URL}${encodeURIComponent(username)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    return null;
+  }
+
+  const data = await res.json();
+  const skills = Array.isArray(data?.skills) ? data.skills : [];
+
+  return skills
+    .map((skill, index) => ({
+      name: skill?.name || SKILL_NAMES[index] || `Skill ${index}`,
+      rank: Number(skill?.rank ?? -1),
+      level: Number(skill?.level ?? 1),
+      xp: Number(skill?.xp ?? 0)
+    }))
+    .filter((skill) => skill.name !== 'Overall');
+}
 
 export async function fetchHiscoreBossKc(username) {
   const url = `${HISCORE_URL}${encodeURIComponent(username)}`;

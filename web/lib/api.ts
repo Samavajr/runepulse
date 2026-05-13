@@ -1,4 +1,9 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3000';
+const DEFAULT_API_BASE =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3001'
+    : 'https://runepulse-production.up.railway.app';
+
+export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, '');
 
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
@@ -128,7 +133,7 @@ export async function api(path) {
   if (res.status === 403) {
     return { private: true };
   }
-  if (!res.ok) throw new Error(`API ${res.status}`);
+  if (!res.ok) throw new Error(`API ${res.status}: ${API_BASE}${path}`);
   return res.json();
 }
 
