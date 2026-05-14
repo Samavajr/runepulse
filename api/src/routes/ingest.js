@@ -51,6 +51,14 @@ async function mergeDuplicateAccounts(username, keepAccountId) {
     );
 
     await t.none(
+      'DELETE FROM xp_baselines WHERE account_id IN ($1:csv)',
+      [dupIds]
+    );
+    await t.none(
+      'DELETE FROM boss_kc WHERE account_id IN ($1:csv)',
+      [dupIds]
+    );
+    await t.none(
       'DELETE FROM accounts WHERE id IN ($1:csv)',
       [dupIds]
     );
