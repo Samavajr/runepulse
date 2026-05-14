@@ -1,6 +1,6 @@
 import { db } from '../db.js';
 import { accountFromToken } from '../auth.js';
-import { fetchHiscoreSkills } from '../hiscore.js';
+import { fetchHiscoreBossKc, fetchHiscoreSkills } from '../hiscore.js';
 
 const WIKI_PRICE_BASE = 'https://prices.runescape.wiki/api/v1/osrs';
 const WIKI_HEADERS = {
@@ -45,6 +45,42 @@ async function skillsSummaryFromHiscore(username) {
       xpToNext: Math.max(nextLevelXp - currentXp, 0)
     };
   });
+}
+
+async function refreshHiscoreBossKc(accountId, username, logger) {
+  if (!username) return;
+
+  const state = await db.one(
+    `SELECT COUNT(*)::int AS count, MAX(updated_at) AS latest_at
+     FROM boss_kc
+     WHERE account_id = $1`,
+    [accountId]
+  );
+
+  const latestAt = state.latest_at ? new Date(state.latest_at).getTime() : 0;
+  const refreshAfterMs = 6 * 60 * 60 * 1000;
+  if (state.count > 0 && Date.now() - latestAt < refreshAfterMs) {
+    return;
+  }
+
+  try {
+    const hiscoreKc = await fetchHiscoreBossKc(username);
+    const entries = Object.entries(hiscoreKc);
+    if (entries.length === 0) return;
+
+    const upsert = `
+      INSERT INTO boss_kc (account_id, boss, kc, updated_at)
+      VALUES ($1, $2, $3, NOW())
+      ON CONFLICT (account_id, boss)
+      DO UPDATE SET kc = EXCLUDED.kc, updated_at = EXCLUDED.updated_at
+    `;
+
+    for (const [boss, kc] of entries) {
+      await db.none(upsert, [accountId, boss, kc]);
+    }
+  } catch (err) {
+    logger.warn({ err, username }, 'hiscore boss kc refresh failed');
+  }
 }
 
 export default async function analyticsRoutes(app) {
@@ -276,6 +312,8 @@ export default async function analyticsRoutes(app) {
     if (account.is_public === false) {
       return [];
     }
+
+    await refreshHiscoreBossKc(account.id, account.username, req.log);
 
     return db.any(
       `SELECT boss, kc, updated_at
