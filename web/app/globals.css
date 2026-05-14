@@ -783,6 +783,40 @@ a {
   color: var(--danger);
 }
 
+.telemetry-status {
+  display: grid;
+  gap: 14px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.status-item {
+  border: 1px solid rgba(36, 48, 67, 0.45);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(12, 17, 24, 0.62);
+  display: grid;
+  gap: 5px;
+}
+
+.status-item strong {
+  font-size: 13px;
+}
+
+.status-good {
+  color: var(--accent);
+  border-color: rgba(43, 242, 180, 0.45);
+}
+
+.status-warn {
+  color: var(--accent-3);
+  border-color: rgba(246, 193, 119, 0.45);
+}
+
 @media (max-width: 900px) {
   .hero-split {
     grid-template-columns: 1fr;

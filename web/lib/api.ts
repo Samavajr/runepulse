@@ -148,3 +148,7 @@ export async function getBossKc(username: string) {
 export async function getSkillsSummary(username: string) {
   return api(`/profile/${username}/skills-summary`);
 }
+
+export async function getTelemetryStatus(username: string) {
+  return api(`/profile/${username}/telemetry-status`);
+}

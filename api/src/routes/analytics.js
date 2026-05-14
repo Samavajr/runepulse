@@ -84,7 +84,7 @@ export default async function analyticsRoutes(app) {
 
   async function accountByUsername(username) {
     return db.oneOrNone(
-      `SELECT id, is_public, username
+      `SELECT id, is_public, username, updated_at
        FROM accounts
        WHERE LOWER(username) = LOWER($1)
        ORDER BY updated_at DESC NULLS LAST
@@ -130,6 +130,73 @@ export default async function analyticsRoutes(app) {
 
     out.username = account.username;
     return out;
+  });
+
+  app.get('/profile/:username/telemetry-status', async (req) => {
+    const { username } = req.params;
+    const account = await accountByUsername(username);
+    if (!account) {
+      return {
+        accountFound: false,
+        username,
+        isPublic: null,
+        updatedAt: null,
+        baselineCount: 0,
+        latestBaselineAt: null,
+        xpEventCount: 0,
+        latestXpAt: null,
+        xpGained24h: 0,
+        gearSnapshotCount: 0,
+        latestGearAt: null,
+        bossKcCount: 0,
+        latestBossKcAt: null
+      };
+    }
+
+    const [baselines, xp, gear, bosses] = await Promise.all([
+      db.one(
+        `SELECT COUNT(*)::int AS count, MAX(captured_at) AS latest_at
+         FROM xp_baselines
+         WHERE account_id = $1`,
+        [account.id]
+      ),
+      db.one(
+        `SELECT COUNT(*)::int AS count,
+                MAX(timestamp) AS latest_at,
+                COALESCE(SUM(xp_gained) FILTER (WHERE timestamp >= NOW() - INTERVAL '24 hours'), 0)::int AS gained_24h
+         FROM xp_events
+         WHERE account_id = $1`,
+        [account.id]
+      ),
+      db.one(
+        `SELECT COUNT(*)::int AS count, MAX(timestamp) AS latest_at
+         FROM gear_snapshots
+         WHERE account_id = $1`,
+        [account.id]
+      ),
+      db.one(
+        `SELECT COUNT(*)::int AS count, MAX(updated_at) AS latest_at
+         FROM boss_kc
+         WHERE account_id = $1`,
+        [account.id]
+      )
+    ]);
+
+    return {
+      accountFound: true,
+      username: account.username,
+      isPublic: account.is_public,
+      updatedAt: account.updated_at,
+      baselineCount: Number(baselines.count || 0),
+      latestBaselineAt: baselines.latest_at,
+      xpEventCount: Number(xp.count || 0),
+      latestXpAt: xp.latest_at,
+      xpGained24h: Number(xp.gained_24h || 0),
+      gearSnapshotCount: Number(gear.count || 0),
+      latestGearAt: gear.latest_at,
+      bossKcCount: Number(bosses.count || 0),
+      latestBossKcAt: bosses.latest_at
+    };
   });
 
   app.get('/profile/:username/xp-history/:skill', async (req) => {
