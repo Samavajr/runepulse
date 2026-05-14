@@ -1,17 +1,33 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SkillsSummaryTable from '@/components/SkillsSummaryTable';
 import XpHistoryChart from '@/components/XpHistoryChart';
 
-export default function SkillsOverviewPanel({ rows, username }) {
+function pickSkill(skillList, initialSkill) {
+  if (initialSkill && skillList.includes(initialSkill)) {
+    return initialSkill;
+  }
+
+  return skillList[0] || 'Attack';
+}
+
+export default function SkillsOverviewPanel({ rows, username, initialSkill }) {
   const skillList = useMemo(
     () => rows?.map((row) => row.skill).filter(Boolean) || [],
     [rows]
   );
   const [selectedSkill, setSelectedSkill] = useState(
-    skillList[0] || 'Attack'
+    () => pickSkill(skillList, initialSkill)
   );
+
+  useEffect(() => {
+    setSelectedSkill((current) => (
+      skillList.includes(current) && current !== 'Attack'
+        ? current
+        : pickSkill(skillList, initialSkill)
+    ));
+  }, [initialSkill, skillList]);
 
   return (
     <div className="grid grid-2">

@@ -42,6 +42,21 @@ function TelemetryStatus({ status }) {
   );
 }
 
+function topRecentSkill(totals) {
+  for (const range of ['day', 'week', 'month', 'year', 'lifetime']) {
+    const rows = Array.isArray(totals?.[range]) ? totals[range] : [];
+    const best = [...rows]
+      .filter((row) => Number(row.xp || 0) > 0)
+      .sort((a, b) => Number(b.xp || 0) - Number(a.xp || 0))[0];
+
+    if (best?.skill) {
+      return best.skill;
+    }
+  }
+
+  return null;
+}
+
 export default async function Page({ params }) {
   const totals = await api(`/profile/${params.username}/xp-totals`);
   if (totals?.private) {
@@ -62,6 +77,7 @@ export default async function Page({ params }) {
   const telemetryStatus = await getTelemetryStatus(params.username);
 
   const displayName = totals?.username || params.username;
+  const initialSkill = topRecentSkill(totals);
 
   return (
     <main className="container grid" style={{ gap: 22 }}>
@@ -78,7 +94,7 @@ export default async function Page({ params }) {
 
       <TelemetryStatus status={telemetryStatus} />
 
-      <SkillsOverviewPanel rows={skillsSummary || []} username={params.username} />
+      <SkillsOverviewPanel rows={skillsSummary || []} username={params.username} initialSkill={initialSkill} />
 
       <div className="grid grid-2">
         <GearPanel gear={gear} />

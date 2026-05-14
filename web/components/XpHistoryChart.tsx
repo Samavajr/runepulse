@@ -15,7 +15,7 @@ import {
 import { API_BASE } from '@/lib/api';
 
 export default function XpHistoryChart({ username, skill }) {
-  const [range, setRange] = useState('month');
+  const [range, setRange] = useState('day');
   const [metric, setMetric] = useState('xp');
   const [chartType, setChartType] = useState('auto');
   const [data, setData] = useState([]);
@@ -39,7 +39,7 @@ export default function XpHistoryChart({ username, skill }) {
   };
 
   useEffect(() => {
-    fetch(`${API_BASE}/profile/${username}/xp-history/${skill}?range=${range}`)
+    fetch(`${API_BASE}/profile/${encodeURIComponent(username)}/xp-history/${encodeURIComponent(skill)}?range=${range}`)
       .then((r) => r.json())
       .then(setData)
       .catch(() => setData([]));
