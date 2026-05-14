@@ -138,13 +138,13 @@ export async function api(path) {
 }
 
 export async function getGear(username: string) {
-  return api(`/profile/${username}/gear`);
+  return api(`/profile/${encodeURIComponent(username)}/gear`);
 }
 
-export async function getBossKc(username: string) {
-  return api(`/profile/${username}/boss-kc?limit=10`);
+export async function getBossKc(username: string, limit = 10) {
+  return api(`/profile/${encodeURIComponent(username)}/boss-kc?limit=${limit}`);
 }
 
 export async function getSkillsSummary(username: string) {
-  return api(`/profile/${username}/skills-summary`);
+  return api(`/profile/${encodeURIComponent(username)}/skills-summary`);
 }

@@ -65,14 +65,21 @@ async function mergeDuplicateAccounts(username, keepAccountId) {
   });
 }
 
-async function ensureBossKcBaseline(accountId, username, logger) {
+async function syncHiscoreBossKc(accountId, username, logger) {
   if (!username) return;
 
-  const existing = await db.oneOrNone(
-    'SELECT 1 FROM boss_kc WHERE account_id = $1 LIMIT 1',
+  const state = await db.one(
+    `SELECT COUNT(*)::int AS count, MAX(updated_at) AS latest_at
+     FROM boss_kc
+     WHERE account_id = $1`,
     [accountId]
   );
-  if (existing) return;
+
+  const latestAt = state.latest_at ? new Date(state.latest_at).getTime() : 0;
+  const refreshAfterMs = 6 * 60 * 60 * 1000;
+  if (state.count > 0 && Date.now() - latestAt < refreshAfterMs) {
+    return;
+  }
 
   try {
     const hiscoreKc = await fetchHiscoreBossKc(username);
@@ -113,7 +120,7 @@ export default async function ingestRoutes(app) {
         [username, account.id]
       );
       await mergeDuplicateAccounts(username, account.id);
-      await ensureBossKcBaseline(account.id, username, app.log);
+      await syncHiscoreBossKc(account.id, username, app.log);
     }
 
     const entries = Object.entries(xpGained);
@@ -145,7 +152,7 @@ export default async function ingestRoutes(app) {
         [username, account.id]
       );
       await mergeDuplicateAccounts(username, account.id);
-      await ensureBossKcBaseline(account.id, username, app.log);
+      await syncHiscoreBossKc(account.id, username, app.log);
     }
 
     const entries = Object.entries(skills);
@@ -179,7 +186,7 @@ export default async function ingestRoutes(app) {
         [username, account.id]
       );
       await mergeDuplicateAccounts(username, account.id);
-      await ensureBossKcBaseline(account.id, username, app.log);
+      await syncHiscoreBossKc(account.id, username, app.log);
     }
 
     await db.none(
@@ -204,7 +211,7 @@ export default async function ingestRoutes(app) {
         [username, account.id]
       );
       await mergeDuplicateAccounts(username, account.id);
-      await ensureBossKcBaseline(account.id, username, app.log);
+      await syncHiscoreBossKc(account.id, username, app.log);
     }
 
     const upsert = `

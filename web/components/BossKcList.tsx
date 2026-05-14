@@ -1,3 +1,6 @@
+import AssetImage from '@/components/AssetImage';
+import { getBossImage, initials } from '@/lib/osrsAssets';
+
 export default function BossKcList({ rows }) {
   return (
     <div className="section">
@@ -8,9 +11,26 @@ export default function BossKcList({ rows }) {
         <div className="boss-grid">
           {rows.map((row) => (
             <div key={row.boss} className="boss-card">
-              <div className="boss-name">{row.boss}</div>
-              <div className="boss-kc">{Number(row.kc || 0).toLocaleString()}</div>
-              <div className="mono">kills</div>
+              <div className="boss-card-top">
+                <AssetImage
+                  className="boss-image"
+                  src={getBossImage(row.boss)}
+                  fallback={initials(row.boss)}
+                  fallbackClassName="boss-image boss-image--fallback"
+                />
+                <div>
+                  <div className="boss-name">{row.boss}</div>
+                  {row.updated_at ? (
+                    <div className="mono">
+                      Updated {new Date(row.updated_at).toLocaleDateString('en-US')}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              <div className="boss-kc-row">
+                <span className="boss-kc">{Number(row.kc || 0).toLocaleString()}</span>
+                <span className="mono">kills</span>
+              </div>
             </div>
           ))}
         </div>

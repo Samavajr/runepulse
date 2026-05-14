@@ -1,36 +1,6 @@
 'use client';
 
-const skillIcons = {
-  Attack: 'Attack_icon.png',
-  Strength: 'Strength_icon.png',
-  Defence: 'Defence_icon.png',
-  Ranged: 'Ranged_icon.png',
-  Prayer: 'Prayer_icon.png',
-  Magic: 'Magic_icon.png',
-  Runecraft: 'Runecraft_icon.png',
-  Hitpoints: 'Hitpoints_icon.png',
-  Crafting: 'Crafting_icon.png',
-  Mining: 'Mining_icon.png',
-  Smithing: 'Smithing_icon.png',
-  Fishing: 'Fishing_icon.png',
-  Cooking: 'Cooking_icon.png',
-  Firemaking: 'Firemaking_icon.png',
-  Woodcutting: 'Woodcutting_icon.png',
-  Agility: 'Agility_icon.png',
-  Herblore: 'Herblore_icon.png',
-  Thieving: 'Thieving_icon.png',
-  Fletching: 'Fletching_icon.png',
-  Slayer: 'Slayer_icon.png',
-  Farming: 'Farming_icon.png',
-  Construction: 'Construction_icon.png',
-  Hunter: 'Hunter_icon.png',
-  Sailing: 'Sailing_icon.png'
-};
-
-function getSkillIcon(skill) {
-  const file = skillIcons[skill];
-  return file ? `https://oldschool.runescape.wiki/images/${file}` : null;
-}
+import { getSkillIcon } from '@/lib/osrsAssets';
 
 function xpForLevel(level) {
   let points = 0;

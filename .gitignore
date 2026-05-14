@@ -10,6 +10,7 @@ npm-debug.log*
 .pnpm-debug.log*
 coverage/
 *.log
+*.tsbuildinfo
 runelite-plugin/build/
 runelite-plugin/.gradle/
 runepulse-plugin/

@@ -35,6 +35,7 @@ const BOSS_NAMES = [
   'Araxxor',
   'Artio',
   'Barrows Chests',
+  'Brutus',
   'Bryophyta',
   'Callisto',
   "Calvar'ion",
